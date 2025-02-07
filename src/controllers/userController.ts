@@ -1,21 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { getAllUsers, registerUserService } from '../services/userService';
+import { getAllUsers, loginUserService, registerUserService } from '../services/userService';
 import bcrypt from 'bcryptjs';
-import pool from '../config/database';
 
-// Controller function for registering a new user
-export const registerUser = async (req: Request, res: Response) => {
+// Registering a new user
+export const registerUser = async (req: Request, res: Response): Promise<void>  => {
   const { username, password } = req.body;
 
   try {
-
-    // Check if the user already exists
-    const userExists = await pool.query('SELECT * FROM authschema.users WHERE username = $1', [username]);
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await registerUserService(username, hashedPassword);
@@ -27,13 +18,13 @@ export const registerUser = async (req: Request, res: Response) => {
         username: newUser.username
       }
     });
-  } catch (error) {
+  } catch (error: any ) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error?.message || 'Server error' });
   }
 };
 
-// Controller function for getting all users
+// Getting all users
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await getAllUsers();
@@ -41,5 +32,24 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// User login
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  const { username, password } = req.body;
+
+  try {
+    const { token, user } = await loginUserService(username, password);
+
+    res.status(200).json({ message: 'Login successful', token, user });
+  } catch (error) {
+    console.error('Error during login:', error);
+
+    if (error instanceof Error) {
+      res.status(400).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
