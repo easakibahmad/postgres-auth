@@ -97,3 +97,6 @@ npm install --save-dev @types/pg
 
 ### Step 13: JSON WebToken
 npm install jsonwebtoken bcryptjs
+
+### Step 14: add cookie perser and store token on cookie
+install cookie-parser

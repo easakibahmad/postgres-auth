@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { getAllUsers, loginUserService, registerUserService } from '../services/userService';
 import bcrypt from 'bcryptjs';
+import { verifyToken } from '../middleware/verifyToken';
 
 // Registering a new user
 export const registerUser = async (req: Request, res: Response): Promise<void>  => {
@@ -39,8 +40,16 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   const { username, password } = req.body;
 
+  console.log(() => verifyToken);
   try {
     const { token, user } = await loginUserService(username, password);
+
+    res.cookie('token', token, {
+      httpOnly: true, // Prevents client-side access
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'strict', // Prevents CSRF attacks
+      maxAge: 3600000, // 1 hour
+    });
 
     res.status(200).json({ message: 'Login successful', token, user });
   } catch (error) {
