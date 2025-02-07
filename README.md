@@ -54,15 +54,35 @@ npm install --save-dev ts-node-dev
 }
 
 ### Step 9: Install PostgreSQL
+
+`install postgres` 
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
 sudo systemctl status postgresql
+
+`open postgres terminal`
 sudo -i -u postgres
+
+`check users if psql user exists and its database`
 psql
-SELECT usename FROM pg_user; // check users
+SELECT usename FROM pg_user; 
+
+`login with specific users`
+psql -d dbname or psql -U username -d dbname
 /q (exit)
+
+`check schmea`
+\dn
+`check tables`
+\dt
+
+`create schema`
+CREATE SCHEMA schema-name;
+
+`check tables on individual schema`
+\dt authschema.*
 
 ### Step 10: If you need to set or reset the password for the default user (postgres)
 ALTER USER postgres WITH PASSWORD 'yourpassword';
@@ -74,3 +94,6 @@ DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/yourdbname
 ### Step 12: Install postgresql in project
 npm install pg dotenv
 npm install --save-dev @types/pg
+
+### Step 13: JSON WebToken
+npm install jsonwebtoken bcryptjs
